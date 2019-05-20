@@ -2,6 +2,7 @@ import gym
 import os
 import random
 import numpy as np
+from statistics import mean
 
 
 class MountainCar:
@@ -46,7 +47,7 @@ class MountainCar:
         global_max_height = -1e10
         episodes_to_solve = 0
         self.env.seed(0)
-
+        scores = []
         for i in range(1, episodes):
             obs = self.env.reset()
             state = self.get_Q_index(obs)
@@ -54,7 +55,6 @@ class MountainCar:
             total_score = 0
             max_height = -1e10
             step = 0
-
             while not done:
                 step += 1
                 self.env.render() if rendering else 0  # picture
@@ -71,7 +71,7 @@ class MountainCar:
                 self.Q[state, action] = (1 - self.alpha) * self.Q[state, action] + self.alpha * (
                         modified_reward + self.gamma * np.max(self.Q[next_state]) - self.Q[state, action])
                 state = next_state
-                self.epsilon -= self.epsilon / episodes  # epsilon reduction
+
                 total_score += reward
                 max_height = max(max_height, next_obs[0])
 
@@ -83,7 +83,8 @@ class MountainCar:
                         raise SystemExit()
                     if not episodes_to_solve:
                         episodes_to_solve = i
-
+            scores.append(total_score)
+            self.epsilon -= 5 * self.epsilon / episodes if self.epsilon > 0 else 0  # epsilon reduction
             global_max_score = max(global_max_score, total_score)
             global_max_height = max(global_max_height, max_height)
             if i % 5 == 0:
@@ -95,9 +96,9 @@ class MountainCar:
 
         print("Training finished\n")
         solve_status = "Solved in {} episodes".format(episodes_to_solve) if global_max_height >= 0.5 else "Not Solved"
-        print("Max score: {} ({}), Max height: {}, Solve status : {}".format(global_max_score, 200 + global_max_score,
-                                                                             global_max_height,
-                                                                             solve_status))
+        print("Max score: {} ({} : mean), Max height: {}, Solve status : {}".format(global_max_score, int(mean(scores)),
+                                                                                    global_max_height,
+                                                                                    solve_status))
         self.env.close()
 
 
@@ -105,15 +106,15 @@ if __name__ == '__main__':
     episode_number = 100  # number of episodes
     learn_until_solved = False  # stop if solved
     rendering = False  # picture
-    epsilon = 0.5  # probability of choosing a random action
+    epsilon = 0.1  # probability of choosing a random action
     alpha = 0.5  # learning rate
-    gamma = 0.9  # discount rate
+    gamma = 0.8  # discount rate
     MountainCar(epsilon, alpha, gamma).learn(episode_number, learn_until_solved, rendering)
 
 '''
 results for  episode_number = 100:
-Max score: -111.0 (89.0), Max height: 0.5436075341139893, Solve status : Solved in 30 episodes
+Max score: -112.0 (-177 : mean), Max height: 0.5319902796486286, Solve status : Solved in 27 episodes
 
 results for  episode_number = 1000:
-Max score: -88.0 (112.0), Max height: 0.5393644329783768, Solve status : Solved in 29 episodes
+Max score: -84.0 (-157 : mean), Max height: 0.5391502139325893, Solve status : Solved in 33 episodes
 '''
