@@ -6,3 +6,7 @@ Mountain Car Continuous ploblem - https://github.com/openai/gym/wiki/MountainCar
 
 Solved with Q-learning algorithm with e-greedy policy. 
 Used modified reward acording to potentials - https://people.eecs.berkeley.edu/~pabbeel/cs287-fa09/readings/NgHaradaRussell-shaping-ICML1999.pdf .
+
+
+DDPG links: https://arxiv.org/pdf/1509.02971.pdf, https://towardsdatascience.com/deep-deterministic-policy-gradients-explained-2d94655a9b7b
+
